@@ -1,0 +1,103 @@
+{% extends 'mon_app_ecommerce/base.html' %}
+
+{% block title %}Commande - Shop{% endblock %}
+
+{% block content %}
+<h1 class="text-4xl font-bold mb-8">📦 Passer la commande</h1>
+
+<div class="flex flex-col lg:flex-row gap-8">
+    <!-- Shipping Address -->
+    <div class="flex-1">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-6">📍 Adresse de livraison</h2>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Adresses enregistrées -->
+                    {% if addresses %}
+                    <div class="mb-6">
+                        <label class="label">Sélectionner une adresse enregistrée</label>
+                        <div class="space-y-2">
+                            {% for address in addresses %}
+                            <label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-base-200">
+                                <input type="radio" name="address" value="{{ address.id }}" class="radio radio-primary" />
+                                <div>
+                                    <p class="font-bold">{{ address.street_address }}</p>
+                                    <p class="text-sm text-gray-500">{{ address.city }}, {{ address.state }} {{ address.postal_code }}</p>
+                                    <p class="text-sm text-gray-500">{{ address.country }}</p>
+                                    {% if address.is_default %}
+                                        <span class="badge badge-success badge-sm">Par défaut</span>
+                                    {% endif %}
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="divider">OU</div>
+                    {% endif %}
+
+                    <!-- Nouvelle adresse -->
+                    <div class="mb-6">
+                        <h3 class="font-bold mb-4">Entrer une nouvelle adresse</h3>
+                        <div class="form-control mb-4">
+                            <label class="label">Adresse complète</label>
+                            <input type="text" name="new_address" class="input input-bordered" placeholder="Ex: Cocody Angré 7ème tranche, Abidjan, Côte d'Ivoire" />
+                        </div>
+                    </div>
+
+                    <!-- Notes de commande -->
+                    <div class="form-control mb-6">
+                        <label class="label">Notes de commande (Optionnel)</label>
+                        <textarea name="notes" class="textarea textarea-bordered" rows="4" placeholder="Instructions spéciales pour la livraison ?"></textarea>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div class="flex gap-4">
+                        <a href="{% url 'cart' %}" class="btn btn-ghost">Retour au panier</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check mr-2"></i>Passer la commande
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Résumé de la commande -->
+    <div class="lg:w-1/3">
+        <div class="card bg-base-100 shadow-xl sticky top-24">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Résumé de la commande</h2>
+
+                {% for item in cart_items %}
+                <div class="flex justify-between mb-2">
+                    <span>{{ item.product.name }} x{{ item.quantity }}</span>
+                    <span>{{ item.total_price|floatformat:2 }} FCFA</span>
+                </div>
+                {% endfor %}
+
+                <div class="divider"></div>
+
+                <div class="flex justify-between mb-2">
+                    <span>Sous-total</span>
+                    <span class="font-bold">{{ total|floatformat:2 }} FCFA</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span>Livraison</span>
+                    <span class="font-bold text-success">Gratuite</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="flex justify-between text-xl font-bold">
+                    <span>Total</span>
+                    <span class="text-primary">{{ total|floatformat:2 }} FCFA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

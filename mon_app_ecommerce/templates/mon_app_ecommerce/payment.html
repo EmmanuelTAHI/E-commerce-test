@@ -1,0 +1,318 @@
+{% extends 'mon_app_ecommerce/base.html' %}
+
+{% block title %}Paiement - Commande #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="alert alert-info mb-6">
+        <i class="fas fa-info-circle mr-2"></i>
+        <span>Mode simulation : Pour tester un paiement échoué, utilisez un numéro de carte commençant par 0</span>
+    </div>
+
+    <h1 class="text-4xl font-bold mb-8">💳 Paiement</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Payment Form -->
+        <div class="lg:col-span-2">
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title mb-6">Choisissez votre méthode de paiement</h2>
+
+                    <form method="POST" id="paymentForm">
+                        {% csrf_token %}
+
+                        <!-- Payment Method Selection -->
+                        <div class="form-control mb-6">
+                            <label class="label">
+                                <span class="label-text font-bold">Méthode de paiement</span>
+                            </label>
+                            <select name="payment_method" id="paymentMethod" class="select select-bordered select-lg" required>
+                                <option value="">-- Sélectionner une méthode --</option>
+                                <option value="Credit Card">💳 Carte de crédit</option>
+                                <option value="Orange Money">🟠 Orange Money</option>
+                                <option value="Moov Money">🔵 Moov Money</option>
+                                <option value="MTN Money">🟡 MTN Money</option>
+                                <option value="Wave">🌊 Wave</option>
+                                <option value="Cash on Delivery">💰 Payer à la livraison</option>
+                            </select>
+                        </div>
+
+                        <!-- Credit Card Fields -->
+                        <div id="creditCardFields" style="display: none;">
+                            <!-- Card Number -->
+                            <div class="form-control mb-4">
+                                <label class="label">
+                                    <span class="label-text">Numéro de carte</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="card_number"
+                                    placeholder="1234 5678 9012 3456"
+                                    class="input input-bordered font-mono"
+                                    maxlength="19"
+                                    id="cardNumber"
+                                />
+                                <label class="label">
+                                    <span class="label-text-alt">Format: XXXX XXXX XXXX XXXX</span>
+                                </label>
+                            </div>
+
+                            <!-- Card Name -->
+                            <div class="form-control mb-4">
+                                <label class="label">
+                                    <span class="label-text">Nom sur la carte</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="card_name"
+                                    placeholder="JOHN DOE"
+                                    class="input input-bordered uppercase"
+                                    id="cardName"
+                                />
+                            </div>
+
+                            <!-- Expiry and CVV -->
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text">Date d'expiration</span>
+                                    </label>
+                                    <div class="flex gap-2">
+                                        <select name="expiry_month" id="expiryMonth" class="select select-bordered flex-1">
+                                            <option value="">Mois</option>
+                                            <option value="01">01</option>
+                                            <option value="02">02</option>
+                                            <option value="03">03</option>
+                                            <option value="04">04</option>
+                                            <option value="05">05</option>
+                                            <option value="06">06</option>
+                                            <option value="07">07</option>
+                                            <option value="08">08</option>
+                                            <option value="09">09</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                        </select>
+                                        <select name="expiry_year" id="expiryYear" class="select select-bordered flex-1">
+                                            <option value="">Année</option>
+                                            <option value="2024">2024</option>
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                            <option value="2028">2028</option>
+                                            <option value="2029">2029</option>
+                                            <option value="2030">2030</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text">CVV</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="cvv"
+                                        placeholder="123"
+                                        class="input input-bordered font-mono"
+                                        maxlength="4"
+                                        pattern="[0-9]{3,4}"
+                                        id="cvv"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Money Fields -->
+                        <div id="mobileMoneyFields" style="display: none;">
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-mobile-alt mr-2"></i>
+                                <span>Entrez votre numéro de téléphone mobile money</span>
+                            </div>
+
+                            <div class="form-control mb-4">
+                                <label class="label">
+                                    <span class="label-text">Numéro de téléphone</span>
+                                </label>
+                                <input
+                                    type="tel"
+                                    name="phone_number"
+                                    placeholder="Ex: +225 07 12 34 56 78"
+                                    class="input input-bordered"
+                                    id="phoneNumber"
+                                />
+                                <label class="label">
+                                    <span class="label-text-alt">Format avec indicatif pays (ex: +225 pour la Côte d'Ivoire)</span>
+                                </label>
+                            </div>
+
+                            <div class="alert alert-warning mb-4">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <span class="text-sm">Vous recevrez une demande de confirmation sur votre téléphone mobile.</span>
+                            </div>
+                        </div>
+
+                        <!-- Cash on Delivery Info -->
+                        <div id="cashOnDeliveryInfo" style="display: none;">
+                            <div class="alert alert-success mb-4">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <div>
+                                    <h3 class="font-bold">Paiement à la livraison</h3>
+                                    <p class="text-sm mt-2">Vous paierez en espèces ou par mobile money au moment de la livraison. Pas de paiement en ligne requis.</p>
+                                    <p class="text-sm mt-2 font-semibold">Le livreur vous contactera avant la livraison pour confirmer l'adresse.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Notice -->
+                        <div class="alert alert-warning mb-6" id="securityNotice" style="display: none;">
+                            <i class="fas fa-lock mr-2"></i>
+                            <span class="text-sm">🔒 Cette transaction est sécurisée (mode simulation)</span>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="flex gap-4">
+                            <a href="{% url 'checkout' %}" class="btn btn-ghost">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg flex-1" id="submitBtn">
+                                <i class="fas fa-credit-card mr-2"></i>Confirmer le paiement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="card bg-base-100 shadow-xl sticky top-24">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Résumé de la commande</h2>
+
+                    <div class="mb-4">
+                        <p class="text-sm text-base-content/70">Numéro de commande</p>
+                        <p class="font-mono font-bold">{{ order.order_number }}</p>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="space-y-2 mb-4">
+                        {% for item in order.items.all %}
+                        <div class="flex justify-between text-sm">
+                            <span>{{ item.product.name }} x{{ item.quantity }}</span>
+                            <span>{{ item.subtotal|floatformat:2 }} FCFA</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between">
+                            <span>Sous-total</span>
+                            <span>{{ order.total_amount|floatformat:2 }} FCFA</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Livraison</span>
+                            <span class="text-success">Gratuite</span>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="flex justify-between text-xl font-bold text-primary">
+                        <span>Total</span>
+                        <span>{{ order.total_amount|floatformat:2 }} FCFA</span>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-base-200 rounded-lg">
+                        <p class="text-sm font-semibold mb-2">Adresse de livraison</p>
+                        <p class="text-xs text-base-content/70">{{ order.shipping_address|linebreaksbr }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    (function() {
+        'use strict';
+
+        const orderTotal = parseFloat('{{ order.total_amount }}');
+        const paymentMethod = document.getElementById('paymentMethod');
+        const creditCardFields = document.getElementById('creditCardFields');
+        const mobileMoneyFields = document.getElementById('mobileMoneyFields');
+        const cashOnDeliveryInfo = document.getElementById('cashOnDeliveryInfo');
+        const securityNotice = document.getElementById('securityNotice');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function togglePaymentFields() {
+            const method = paymentMethod.value;
+
+            // Hide all fields first
+            if (creditCardFields) creditCardFields.style.display = 'none';
+            if (mobileMoneyFields) mobileMoneyFields.style.display = 'none';
+            if (cashOnDeliveryInfo) cashOnDeliveryInfo.style.display = 'none';
+            if (securityNotice) securityNotice.style.display = 'none';
+
+            // Clear required attributes
+            const cardNumber = document.getElementById('cardNumber');
+            const cardName = document.getElementById('cardName');
+            const expiryMonth = document.getElementById('expiryMonth');
+            const expiryYear = document.getElementById('expiryYear');
+            const cvv = document.getElementById('cvv');
+            const phoneNumber = document.getElementById('phoneNumber');
+
+            [cardNumber, cardName, expiryMonth, expiryYear, cvv, phoneNumber].forEach(field => {
+                if (field) field.removeAttribute('required');
+            });
+
+            // Show appropriate fields based on payment method
+            if (method === 'Credit Card') {
+                if (creditCardFields) creditCardFields.style.display = 'block';
+                if (securityNotice) securityNotice.style.display = 'block';
+                if (cardNumber) cardNumber.setAttribute('required', 'required');
+                if (cardName) cardName.setAttribute('required', 'required');
+                if (expiryMonth) expiryMonth.setAttribute('required', 'required');
+                if (expiryYear) expiryYear.setAttribute('required', 'required');
+                if (cvv) cvv.setAttribute('required', 'required');
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-credit-card mr-2"></i>Payer ' + orderTotal.toFixed(2) + ' FCFA';
+            } else if (['Orange Money', 'Moov Money', 'MTN Money', 'Wave'].includes(method)) {
+                if (mobileMoneyFields) mobileMoneyFields.style.display = 'block';
+                if (securityNotice) securityNotice.style.display = 'block';
+                if (phoneNumber) phoneNumber.setAttribute('required', 'required');
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-mobile-alt mr-2"></i>Confirmer le paiement';
+            } else if (method === 'Cash on Delivery') {
+                if (cashOnDeliveryInfo) cashOnDeliveryInfo.style.display = 'block';
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-truck mr-2"></i>Confirmer la commande';
+            } else {
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-credit-card mr-2"></i>Confirmer le paiement';
+            }
+        }
+
+        // Add multiple event listeners for better reactivity
+        if (paymentMethod) {
+            paymentMethod.addEventListener('change', togglePaymentFields, false);
+            paymentMethod.addEventListener('input', togglePaymentFields, false);
+            // Trigger on load if value is already set
+            if (paymentMethod.value) {
+                setTimeout(togglePaymentFields, 0);
+            }
+        }
+
+        // Format card number input
+        const cardNumberInput = document.getElementById('cardNumber');
+        if (cardNumberInput) {
+            cardNumberInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formattedValue;
+            }, false);
+        }
+    })();
+</script>
+{% endblock %}
+{% endblock %}

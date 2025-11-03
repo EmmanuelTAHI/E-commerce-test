@@ -1,0 +1,176 @@
+{% extends 'mon_app_ecommerce/base.html' %}
+
+{% block title %}Account - Shop{% endblock %}
+
+{% block content %}
+<h1 class="text-4xl font-bold mb-8">My Account</h1>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Profile -->
+    <div class="col-span-2">
+        <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+                <h2 class="card-title mb-6">Profile Information</h2>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="update_profile" value="true">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">First Name</span>
+                            </label>
+                            <input type="text" name="first_name" value="{{ user.first_name }}" class="input input-bordered" />
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Last Name</span>
+                            </label>
+                            <input type="text" name="last_name" value="{{ user.last_name }}" class="input input-bordered" />
+                        </div>
+                    </div>
+
+                    <div class="form-control mb-4">
+                        <label class="label">
+                            <span class="label-text">Email</span>
+                        </label>
+                        <input type="email" name="email" value="{{ user.email }}" class="input input-bordered" />
+                    </div>
+
+                    <div class="form-control mb-4">
+                        <label class="label">
+                            <span class="label-text">Phone</span>
+                        </label>
+                        <input type="text" name="phone" value="{{ customer.phone }}" class="input input-bordered" placeholder="+1 (555) 000-0000" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-2"></i>Update Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Addresses -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="card-title">Saved Addresses</h2>
+                </div>
+
+                {% if addresses %}
+                    <div class="space-y-4">
+                        {% for address in addresses %}
+                        <div class="p-4 border rounded-lg">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <p class="font-bold">{{ address.street_address }}</p>
+                                    <p class="text-sm text-gray-500">{{ address.city }}, {{ address.state }} {{ address.postal_code }}</p>
+                                    <p class="text-sm text-gray-500">{{ address.country }}</p>
+                                </div>
+                                {% if address.is_default %}
+                                    <span class="badge badge-success">Default</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-500">No saved addresses yet.</p>
+                {% endif %}
+
+                <!-- Add New Address -->
+                <div class="collapse collapse-arrow border border-base-300 bg-base-200 mt-6">
+                    <input type="checkbox" />
+                    <div class="collapse-title text-lg font-medium">
+                        <i class="fas fa-plus mr-2"></i>Add New Address
+                    </div>
+                    <div class="collapse-content">
+                        <form method="post" class="pt-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="add_address" value="true">
+
+                            <div class="form-control mb-4">
+                                <label class="label">
+                                    <span class="label-text">Street Address</span>
+                                </label>
+                                <input type="text" name="street_address" class="input input-bordered" required />
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text">City</span>
+                                    </label>
+                                    <input type="text" name="city" class="input input-bordered" required />
+                                </div>
+
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text">State</span>
+                                    </label>
+                                    <input type="text" name="state" class="input input-bordered" required />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text">Postal Code</span>
+                                    </label>
+                                    <input type="text" name="postal_code" class="input input-bordered" required />
+                                </div>
+
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text">Country</span>
+                                    </label>
+                                    <input type="text" name="country" value="United States" class="input input-bordered" required />
+                                </div>
+                            </div>
+
+                            <div class="form-control mb-4">
+                                <label class="label cursor-pointer">
+                                    <span class="label-text">Set as default address</span>
+                                    <input type="checkbox" name="is_default" class="checkbox checkbox-primary" />
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus mr-2"></i>Add Address
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <div class="avatar placeholder mx-auto mb-4">
+                    <div class="bg-neutral text-neutral-content rounded-full w-20">
+                        <span class="text-3xl">{{ user.first_name.0|default:user.username.0|upper }}</span>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-bold text-center mb-2">{{ user.first_name }} {{ user.last_name }}</h3>
+                <p class="text-center text-gray-500 mb-6">{{ user.email }}</p>
+
+                <div class="space-y-2">
+                    <a href="{% url 'order_history' %}" class="btn btn-ghost btn-block">
+                        <i class="fas fa-history mr-2"></i>Order History
+                    </a>
+                    <a href="{% url 'cart' %}" class="btn btn-ghost btn-block">
+                        <i class="fas fa-shopping-cart mr-2"></i>Shopping Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

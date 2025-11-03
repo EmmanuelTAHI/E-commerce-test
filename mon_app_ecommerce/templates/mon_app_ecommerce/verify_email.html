@@ -1,0 +1,91 @@
+{% extends 'mon_app_ecommerce/base.html' %}
+
+{% block title %}Verify Email - Shop{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-200px)]">
+    <div class="card bg-base-100 shadow-2xl w-full max-w-md">
+        <div class="card-body">
+            <div class="text-center mb-6">
+                <div class="avatar placeholder mx-auto mb-4">
+                    <div class="bg-primary text-primary-content rounded-full w-20">
+                        <i class="fas fa-envelope text-4xl"></i>
+                    </div>
+                </div>
+                <h1 class="text-3xl font-bold">
+                    Verify Your Email
+                </h1>
+                <p class="text-gray-500 mt-2">
+                    We sent a verification code to your email
+                </p>
+            </div>
+
+            <div class="alert alert-info mb-6">
+                <i class="fas fa-info-circle"></i>
+                <span>Please check your email (including spam folder) and enter the 6-digit code below.</span>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-control mb-6">
+                    <label class="label">
+                        <span class="label-text">Verification Code</span>
+                    </label>
+                    <input
+                        type="text"
+                        name="code"
+                        class="input input-bordered input-lg text-center text-2xl tracking-widest"
+                        placeholder="000000"
+                        maxlength="6"
+                        pattern="[0-9]{6}"
+                        required
+                        autofocus
+                        style="letter-spacing: 0.5em;"
+                    />
+                    <label class="label">
+                        <span class="label-text-alt">Enter the 6-digit code sent to your email</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mb-4">
+                    <i class="fas fa-check-circle mr-2"></i>Verify Email
+                </button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <div class="text-center text-sm">
+                <p class="mb-2">Didn't receive the code?</p>
+                <a href="{% url 'register' %}" class="link link-primary">
+                    Try registering again
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-focus and format code input
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.querySelector('input[name="code"]');
+
+        codeInput.addEventListener('input', function(e) {
+            // Only allow digits
+            this.value = this.value.replace(/[^0-9]/g, '');
+
+            // Limit to 6 digits
+            if (this.value.length > 6) {
+                this.value = this.value.slice(0, 6);
+            }
+        });
+
+        codeInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedText = e.clipboardData.getData('text');
+            const digits = pastedText.replace(/[^0-9]/g, '').slice(0, 6);
+            this.value = digits;
+        });
+    });
+</script>
+{% endblock %}

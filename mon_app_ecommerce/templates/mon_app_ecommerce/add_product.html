@@ -1,0 +1,110 @@
+{% extends 'mon_app_ecommerce/base.html' %}
+
+{% block title %}Ajouter un Produit - Shop{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-4xl font-bold">
+                <i class="fas fa-plus-circle mr-2 text-primary"></i>Ajouter un Produit
+            </h1>
+            <a href="{% url 'seller_dashboard' %}" class="btn btn-ghost">
+                <i class="fas fa-arrow-left mr-2"></i>Retour au tableau de bord
+            </a>
+        </div>
+
+        <div class="card bg-base-100 shadow-2xl">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="form-control mb-4">
+                        <label class="label">
+                            <span class="label-text font-semibold">Nom du produit <span class="text-error">*</span></span>
+                        </label>
+                        <input type="text" name="name" class="input input-bordered w-full" required placeholder="Ex: Smartphone XYZ" />
+                    </div>
+
+                    <div class="form-control mb-4">
+                        <label class="label">
+                            <span class="label-text font-semibold">Description <span class="text-error">*</span></span>
+                        </label>
+                        <textarea name="description" class="textarea textarea-bordered" rows="6" required placeholder="Décrivez votre produit en détail..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Prix (FCFA) <span class="text-error">*</span></span>
+                            </label>
+                            <input type="number" name="price" step="0.01" min="0" class="input input-bordered w-full" required placeholder="0.00" />
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Prix réduit (FCFA)</span>
+                            </label>
+                            <input type="number" name="discount_price" step="0.01" min="0" class="input input-bordered w-full" placeholder="0.00" />
+                            <label class="label">
+                                <span class="label-text-alt text-gray-500">Laissez vide si pas de réduction</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Catégorie <span class="text-error">*</span></span>
+                            </label>
+                            <select name="category" class="select select-bordered w-full" required>
+                                <option value="">Sélectionnez une catégorie</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Stock <span class="text-error">*</span></span>
+                            </label>
+                            <input type="number" name="stock" min="0" class="input input-bordered w-full" required value="0" />
+                        </div>
+                    </div>
+
+                    <div class="form-control mb-4">
+                        <label class="label">
+                            <span class="label-text font-semibold">Image du produit <span class="text-error">*</span></span>
+                        </label>
+                        <input type="file" name="image" accept="image/*" class="file-input file-input-bordered w-full" required />
+                        <label class="label">
+                            <span class="label-text-alt text-gray-500">Formats acceptés: JPG, PNG, GIF</span>
+                        </label>
+                    </div>
+
+                    <div class="form-control mb-6">
+                        <label class="label cursor-pointer justify-start gap-4">
+                            <input type="checkbox" name="is_featured" class="checkbox checkbox-primary" />
+                            <span class="label-text font-semibold">Produit vedette</span>
+                        </label>
+                        <label class="label cursor-pointer justify-start gap-4">
+                            <input type="checkbox" name="is_active" checked class="checkbox checkbox-primary" />
+                            <span class="label-text font-semibold">Produit actif</span>
+                        </label>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="submit" class="btn btn-primary btn-lg flex-1">
+                            <i class="fas fa-check mr-2"></i>Publier le produit
+                        </button>
+                        <a href="{% url 'seller_dashboard' %}" class="btn btn-ghost btn-lg">
+                            <i class="fas fa-times mr-2"></i>Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

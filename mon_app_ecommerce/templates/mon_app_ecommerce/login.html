@@ -1,0 +1,44 @@
+{% extends 'mon_app_ecommerce/base.html' %}
+
+{% block title %}Login - Shop{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-200px)]">
+    <div class="card bg-base-100 shadow-2xl w-full max-w-md">
+        <div class="card-body">
+            <h1 class="text-3xl font-bold text-center mb-6">
+                <i class="fas fa-user-circle mr-2 text-primary"></i>Login
+            </h1>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Username</span>
+                    </label>
+                    <input type="text" name="username" class="input input-bordered w-full" required autofocus />
+                </div>
+
+                <div class="form-control mb-6">
+                    <label class="label">
+                        <span class="label-text">Password</span>
+                    </label>
+                    <input type="password" name="password" class="input input-bordered w-full" required />
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mb-4">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <p class="text-center text-sm">
+                Don't have an account?
+                <a href="{% url 'register' %}" class="link link-primary">Register here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

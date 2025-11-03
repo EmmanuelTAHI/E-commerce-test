@@ -1,0 +1,63 @@
+{% extends 'mon_app_ecommerce/base.html' %}
+
+{% block title %}Historique des commandes - Shop{% endblock %}
+
+{% block content %}
+<h1 class="text-4xl font-bold mb-8">📦 Historique des commandes</h1>
+
+{% if orders %}
+    <div class="space-y-4">
+        {% for order in orders %}
+        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+            <div class="card-body">
+                <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-4 mb-2">
+                            <h3 class="text-xl font-bold">Commande #{{ order.order_number }}</h3>
+                            <span class="badge badge-{% if order.status == 'delivered' %}success{% elif order.status == 'shipped' %}info{% elif order.status == 'processing' %}primary{% elif order.status == 'cancelled' %}error{% else %}warning{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                            {% if order.payment_status == 'paid' %}
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check-circle mr-1"></i>Payé
+                                </span>
+                            {% elif order.payment_status == 'pending' %}
+                                <span class="badge badge-warning">
+                                    <i class="fas fa-clock mr-1"></i>Paiement en attente
+                                </span>
+                            {% elif order.payment_status == 'failed' %}
+                                <span class="badge badge-error">
+                                    <i class="fas fa-times-circle mr-1"></i>Paiement échoué
+                                </span>
+                            {% endif %}
+                        </div>
+                        <p class="text-sm text-base-content/70">Passée le {{ order.created_at|date:"d F Y à H:i" }}</p>
+                        <p class="mt-2">Total: <span class="font-bold text-primary">{{ order.total_amount|floatformat:2 }} FCFA</span></p>
+                        {% if order.payment_status == 'pending' or order.payment_status == 'failed' %}
+                        <a href="{% url 'payment' order.id %}" class="btn btn-primary btn-xs mt-2">
+                            <i class="fas fa-credit-card mr-1"></i>Finaliser le paiement
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex gap-2">
+                        <a href="{% url 'order_detail' order.id %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye mr-2"></i>Voir les détails
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-20">
+        <i class="fas fa-receipt text-6xl text-base-content/30 mb-4"></i>
+        <h3 class="text-2xl font-bold mb-2">Aucune commande pour le moment</h3>
+        <p class="text-base-content/70 mb-6">Commencez vos achats pour voir votre historique de commandes ici !</p>
+        <a href="{% url 'product_list' %}" class="btn btn-primary">
+            <i class="fas fa-shopping-bag mr-2"></i>Commencer les achats
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

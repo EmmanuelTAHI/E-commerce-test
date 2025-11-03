@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="forest">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Shop - Modern E-Commerce{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+    <!-- DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Apply JetBrains Mono font */
+        * {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200">
+    <!-- Navbar -->
+    <div class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+        <div class="navbar-start">
+            <div class="dropdown">
+                <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a href="{% url 'home' %}">Accueil</a></li>
+                    <li><a href="{% url 'product_list' %}">Produits</a></li>
+                    {% if user.is_staff %}
+                    <li><a href="{% url 'dashboard' %}" class="text-primary font-semibold">Dashboard</a></li>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'cart' %}">Panier</a></li>
+                        <li><a href="{% url 'order_history' %}">Commandes</a></li>
+                        <li><a href="{% url 'seller_dashboard' %}">Boutique Vendeur</a></li>
+                        <li><a href="{% url 'register_seller' %}">Devenir Vendeur</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <a href="{% url 'home' %}" class="btn btn-ghost text-xl font-bold">
+                <i class="fas fa-shopping-bag mr-2"></i>Shop
+            </a>
+        </div>
+
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1">
+                <li><a href="{% url 'home' %}" class="text-base">Accueil</a></li>
+                <li><a href="{% url 'product_list' %}" class="text-base">Produits</a></li>
+                {% if user.is_staff %}
+                <li><a href="{% url 'dashboard' %}" class="text-base text-primary font-semibold">Dashboard</a></li>
+                {% endif %}
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'seller_dashboard' %}" class="text-base text-success font-semibold">Boutique Vendeur</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <div class="navbar-end gap-2">
+            {% if user.is_authenticated %}
+                <!-- Cart -->
+                <div class="indicator">
+                    <span class="indicator-item badge badge-primary">
+                        <a href="{% url 'cart' %}" class="text-white"></a>
+                        {{ cart_items|length }}
+                    </span>
+                    <a href="{% url 'cart' %}" class="btn btn-ghost">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                    </a>
+                </div>
+
+                <!-- Account Dropdown -->
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-ghost">
+                        <div class="avatar placeholder">
+                            <div class="bg-neutral text-neutral-content rounded-full w-10">
+                                <span class="text-lg">{{ user.first_name.0|default:user.username.0|upper }}</span>
+                            </div>
+                        </div>
+                        <span class="ml-2 hidden md:inline">{{ user.first_name|default:user.username }}</span>
+                        <i class="fas fa-chevron-down ml-1"></i>
+                    </div>
+                    <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a href="{% url 'account' %}"><i class="fas fa-user-circle mr-2"></i>Compte</a></li>
+                        <li><a href="{% url 'order_history' %}"><i class="fas fa-history mr-2"></i>Historique</a></li>
+                        {% if user.is_staff %}
+                        <li><a href="{% url 'dashboard' %}"><i class="fas fa-chart-line mr-2"></i>Dashboard</a></li>
+                        {% endif %}
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'seller_dashboard' %}"><i class="fas fa-store mr-2"></i>Boutique Vendeur</a></li>
+                        <li><a href="{% url 'register_seller' %}"><i class="fas fa-store mr-2"></i>Devenir Vendeur</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt mr-2"></i>Déconnexion</a></li>
+                    </ul>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-ghost">Login</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="mt-4 mx-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} shadow-lg mb-2">
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer p-10 bg-base-300 text-base-content mt-20">
+        <nav>
+            <h6 class="footer-title">Company</h6>
+            <a class="link link-hover">About us</a>
+            <a class="link link-hover">Contact</a>
+            <a class="link link-hover">Jobs</a>
+            <a class="link link-hover">Press kit</a>
+        </nav>
+        <nav>
+            <h6 class="footer-title">Legal</h6>
+            <a class="link link-hover">Terms of use</a>
+            <a class="link link-hover">Privacy policy</a>
+            <a class="link link-hover">Cookie policy</a>
+        </nav>
+        <nav>
+            <h6 class="footer-title">Social</h6>
+            <div class="grid grid-flow-col gap-4">
+                <a class="link link-hover"><i class="fab fa-twitter"></i></a>
+                <a class="link link-hover"><i class="fab fa-youtube"></i></a>
+                <a class="link link-hover"><i class="fab fa-facebook"></i></a>
+            </div>
+        </nav>
+    </footer>
+
+    <script>
+        // Auto-hide messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.alert');
+            messages.forEach(function(alert) {
+                setTimeout(function() {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(function() {
+                        alert.remove();
+                    }, 500);
+                }, 5000);
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

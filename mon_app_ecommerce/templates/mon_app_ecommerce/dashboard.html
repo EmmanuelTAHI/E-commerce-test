@@ -1,0 +1,386 @@
+{% extends 'mon_app_ecommerce/base.html' %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <h1 class="text-4xl font-bold mb-8">Dashboard Admin</h1>
+
+    <!-- Section Statistiques -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold mb-6">📊 Statistiques Générales</h2>
+
+        <!-- Revenus -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="stat bg-base-100 rounded-lg shadow">
+                <div class="stat-title">Revenus Total</div>
+                <div class="stat-value text-primary">{{ total_revenue }} FCFA</div>
+                <div class="stat-desc">Depuis le début</div>
+            </div>
+
+            <div class="stat bg-base-100 rounded-lg shadow">
+                <div class="stat-title">Aujourd'hui</div>
+                <div class="stat-value text-secondary">{{ revenue_today }} FCFA</div>
+                <div class="stat-desc">{{ orders_today }} commandes</div>
+            </div>
+
+            <div class="stat bg-base-100 rounded-lg shadow">
+                <div class="stat-title">Cette Semaine</div>
+                <div class="stat-value text-accent">{{ revenue_week }} FCFA</div>
+                <div class="stat-desc">{{ orders_week }} commandes</div>
+            </div>
+
+            <div class="stat bg-base-100 rounded-lg shadow">
+                <div class="stat-title">Ce Mois</div>
+                <div class="stat-value">{{ revenue_month }} FCFA</div>
+                <div class="stat-desc">30 derniers jours</div>
+            </div>
+        </div>
+
+        <!-- Commandes -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">📦 Total Commandes</h3>
+                    <p class="text-3xl font-bold text-primary">{{ total_orders }}</p>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">⏳ En Attente</h3>
+                    <p class="text-3xl font-bold text-warning">{{ pending_orders }}</p>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">🚚 Expédiées</h3>
+                    <p class="text-3xl font-bold text-info">{{ shipped_orders }}</p>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">✅ Livrées</h3>
+                    <p class="text-3xl font-bold text-success">{{ delivered_orders }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produits et Clients -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">🛍️ Produits</h3>
+                    <p class="text-2xl font-bold">{{ total_products }}</p>
+                    <p class="text-sm text-base-content/70">
+                        Actifs: {{ active_products }} |
+                        Featured: {{ featured_products }}
+                    </p>
+                    {% if low_stock_products > 0 %}
+                        <div class="badge badge-warning mt-2">⚠️ Stock faible: {{ low_stock_products }}</div>
+                    {% endif %}
+                    {% if out_of_stock_products > 0 %}
+                        <div class="badge badge-error mt-2">❌ Rupture: {{ out_of_stock_products }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">📁 Catégories</h3>
+                    <p class="text-2xl font-bold">{{ total_categories }}</p>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">👥 Clients</h3>
+                    <p class="text-2xl font-bold">{{ total_customers }}</p>
+                    <p class="text-sm text-base-content/70">
+                        Aujourd'hui: +{{ new_customers_today }} |
+                        Semaine: +{{ new_customers_week }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">⭐ Avis</h3>
+                    <p class="text-2xl font-bold">{{ total_reviews }}</p>
+                    <p class="text-sm text-base-content/70">Note moyenne: {{ avg_rating }}/5</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commandes Récentes et Produits Populaires -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">📋 Commandes Récentes</h3>
+                    <div class="overflow-x-auto">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Commande</th>
+                                    <th>Client</th>
+                                    <th>Montant</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td class="font-mono text-xs">{{ order.order_number }}</td>
+                                    <td>{{ order.customer.user.username }}</td>
+                                    <td>{{ order.total_amount }} FCFA</td>
+                                    <td>
+                                        <span class="badge badge-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'processing' %}info{% else %}neutral{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-base-content/50">Aucune commande</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="card-title">🔥 Produits les plus vendus</h3>
+                    <div class="space-y-2">
+                        {% for product in top_products %}
+                        <div class="flex justify-between items-center p-2 bg-base-200 rounded">
+                            <span>{{ product.name }}</span>
+                            <span class="badge badge-primary">{{ product.total_sold|default:0 }} vendus</span>
+                        </div>
+                        {% empty %}
+                        <p class="text-center text-base-content/50">Aucune vente pour le moment</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Gestion -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold mb-6">⚙️ Gestion du Contenu</h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Gestion des Catégories -->
+            <div class="card bg-base-100 shadow-lg">
+                <div class="card-body">
+                    <h3 class="card-title">📁 Gérer les Catégories</h3>
+
+                    <!-- Formulaire Ajout Catégorie -->
+                    <form method="POST" class="mb-6">
+                        {% csrf_token %}
+                        <input type="hidden" name="add_category" value="1">
+
+                        <div class="form-control mb-4">
+                            <label class="label">
+                                <span class="label-text">Nom de la catégorie</span>
+                            </label>
+                            <input type="text" name="category_name" placeholder="Ex: Électronique" class="input input-bordered" required>
+                        </div>
+
+                        <div class="form-control mb-4">
+                            <label class="label">
+                                <span class="label-text">Description</span>
+                            </label>
+                            <textarea name="category_description" placeholder="Description de la catégorie..." class="textarea textarea-bordered" rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-full">
+                            <i class="fas fa-plus mr-2"></i>Ajouter Catégorie
+                        </button>
+                    </form>
+
+                    <div class="divider">Catégories existantes</div>
+
+                    <!-- Liste des Catégories -->
+                    <div class="space-y-2 max-h-96 overflow-y-auto">
+                        {% for category in categories %}
+                        <div class="flex justify-between items-center p-3 bg-base-200 rounded">
+                            <div>
+                                <span class="font-semibold">{{ category.name }}</span>
+                                <span class="text-xs text-base-content/50 ml-2">({{ category.slug }})</span>
+                            </div>
+                            <form method="POST" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="delete_category" value="1">
+                                <input type="hidden" name="category_id" value="{{ category.id }}">
+                                <button type="submit" class="btn btn-sm btn-error" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% empty %}
+                        <p class="text-center text-base-content/50">Aucune catégorie</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestion des Produits -->
+            <div class="card bg-base-100 shadow-lg">
+                <div class="card-body">
+                    <h3 class="card-title">🛍️ Gérer les Produits</h3>
+
+                    <!-- Formulaire Ajout Produit -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="add_product" value="1">
+
+                        <div class="form-control mb-4">
+                            <label class="label">
+                                <span class="label-text">Nom du produit</span>
+                            </label>
+                            <input type="text" name="product_name" placeholder="Ex: iPhone 15 Pro" class="input input-bordered" required>
+                        </div>
+
+                        <div class="form-control mb-4">
+                            <label class="label">
+                                <span class="label-text">Description</span>
+                            </label>
+                            <textarea name="product_description" placeholder="Description du produit..." class="textarea textarea-bordered" rows="3"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">Prix (FCFA)</span>
+                                </label>
+                                <input type="number" name="product_price" step="1" min="0" placeholder="1500" class="input input-bordered" required>
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">Prix réduit (FCFA)</span>
+                                </label>
+                                <input type="number" name="product_discount_price" step="1" min="0" placeholder="1000" class="input input-bordered">
+                            </div>
+                        </div>
+
+                        <div class="form-control mb-4">
+                            <label class="label">
+                                <span class="label-text">Catégorie</span>
+                            </label>
+                            <select name="product_category" class="select select-bordered" required>
+                                <option value="">Sélectionner une catégorie</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-control mb-4">
+                            <label class="label">
+                                <span class="label-text">Stock</span>
+                            </label>
+                            <input type="number" name="product_stock" min="0" value="0" class="input input-bordered">
+                        </div>
+
+                        <div class="form-control mb-4">
+                            <label class="cursor-pointer label justify-start gap-4">
+                                <input type="checkbox" name="product_featured" class="checkbox checkbox-primary">
+                                <span class="label-text">Produit en vedette</span>
+                            </label>
+
+                            <label class="cursor-pointer label justify-start gap-4">
+                                <input type="checkbox" name="product_active" class="checkbox checkbox-primary" checked>
+                                <span class="label-text">Produit actif</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-full">
+                            <i class="fas fa-plus mr-2"></i>Ajouter Produit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des Produits -->
+        <div class="card bg-base-100 shadow-lg mt-6">
+            <div class="card-body">
+                <h3 class="card-title">📦 Liste des Produits</h3>
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Catégorie</th>
+                                <th>Prix</th>
+                                <th>Stock</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td class="font-semibold">{{ product.name }}</td>
+                                <td>{{ product.category.name }}</td>
+                                <td>
+                                    {% if product.discount_price %}
+                                        <span class="line-through text-base-content/50">{{ product.price }} FCFA</span>
+                                        <span class="text-primary font-bold">{{ product.discount_price }} FCFA</span>
+                                    {% else %}
+                                        {{ product.price }} FCFA
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if product.stock == 0 %}
+                                        <span class="badge badge-error">Rupture</span>
+                                    {% elif product.stock < 10 %}
+                                        <span class="badge badge-warning">{{ product.stock }}</span>
+                                    {% else %}
+                                        <span class="badge badge-success">{{ product.stock }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if product.is_active %}
+                                        <span class="badge badge-success">Actif</span>
+                                    {% else %}
+                                        <span class="badge badge-neutral">Inactif</span>
+                                    {% endif %}
+                                    {% if product.is_featured %}
+                                        <span class="badge badge-primary ml-1">⭐</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="POST" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_product" value="1">
+                                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                                        <button type="submit" class="btn btn-sm btn-error" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{% url 'admin:mon_app_ecommerce_product_change' product.id %}" class="btn btn-sm btn-info ml-2" target="_blank">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-base-content/50">Aucun produit</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

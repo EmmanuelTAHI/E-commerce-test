@@ -1,0 +1,99 @@
+{% extends 'mon_app_ecommerce/base.html' %}
+
+{% block title %}Products - Shop{% endblock %}
+
+{% block content %}
+<h1 class="text-4xl font-bold mb-8">All Products</h1>
+
+<!-- Filters -->
+<div class="flex flex-col md:flex-row gap-4 mb-8">
+    <!-- Search -->
+    <form method="get" class="flex-1">
+        <div class="form-control">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search products..." class="input input-bordered w-full" />
+        </div>
+    </form>
+
+    <!-- Category Filter -->
+    <div class="dropdown md:dropdown-end">
+        <div tabindex="0" role="button" class="btn m-1">
+            {% if selected_category %}
+                Filter: {{ selected_category }}
+            {% else %}
+                All Categories
+            {% endif %}
+            <i class="fas fa-filter ml-2"></i>
+        </div>
+        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+            <li><a href="{% url 'product_list' %}">All Categories</a></li>
+            {% for category in categories %}
+                <li><a href="{% url 'product_list' %}?category={{ category.slug }}">{{ category.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Products Grid -->
+{% if products %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {% for product in products %}
+        <a href="{% url 'product_detail' product.slug %}" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all hover:scale-105">
+            <figure class="relative">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-64 object-cover">
+                {% else %}
+                    <div class="bg-gray-200 w-full h-64 flex items-center justify-center">
+                        <i class="fas fa-image text-6xl text-gray-400"></i>
+                    </div>
+                {% endif %}
+                {% if product.discount_price %}
+                    <div class="absolute top-2 left-2 badge badge-error">
+                        -{{ product.discount_percentage }}%
+                    </div>
+                {% endif %}
+                {% if not product.in_stock %}
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <span class="badge badge-lg bg-red-500">Out of Stock</span>
+                    </div>
+                {% endif %}
+            </figure>
+            <div class="card-body">
+                <h3 class="card-title text-sm line-clamp-2">{{ product.name }}</h3>
+                <p class="text-sm text-gray-500 line-clamp-2">{{ product.category.name }}</p>
+                <div class="flex items-center justify-between mt-2">
+                    <div>
+                        {% if product.discount_price %}
+                            <span class="text-xl font-bold text-primary">{{ product.discount_price }} FCFA</span>
+                            <span class="text-sm text-gray-400 line-through ml-2">{{ product.price }} FCFA</span>
+                        {% else %}
+                            <span class="text-xl font-bold text-primary">{{ product.price }} FCFA</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if products.has_other_pages %}
+    <div class="join justify-center mt-8">
+        {% if products.has_previous %}
+            <a href="?page={{ products.previous_page_number }}" class="join-item btn">«</a>
+        {% endif %}
+
+        <button class="join-item btn btn-active">Page {{ products.number }} of {{ products.paginator.num_pages }}</button>
+
+        {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}" class="join-item btn">»</a>
+        {% endif %}
+    </div>
+    {% endif %}
+{% else %}
+    <div class="text-center py-20">
+        <i class="fas fa-search text-6xl text-gray-400 mb-4"></i>
+        <h3 class="text-2xl font-bold mb-2">No products found</h3>
+        <p class="text-gray-500">Try adjusting your search or filters</p>
+    </div>
+{% endif %}
+{% endblock %}
